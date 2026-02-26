@@ -6,7 +6,7 @@ export const GET: APIRoute = async ({ locals }) => {
     const runtime = locals.runtime;
     const db = createClient(runtime.env.DB);
     
-    // 测试数据库连接
+    // Test database connection
     const result = await db.query.labels.findFirst();
     
     return new Response(

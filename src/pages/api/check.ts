@@ -3,21 +3,21 @@ import { createClient } from '../../../db/client';
 import { labels } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 
-// UPS 格式: 1Z + 16位字母数字
+// UPS format: 1Z + 16 alphanumeric characters
 const UPS_REGEX = /^1Z[0-9A-Z]{16}$/i;
-// FedEx 格式: 12、15 或 22 位纯数字
+// FedEx format: 12, 15, or 22 digits
 const FEDEX_REGEX = /^\d{12}|\d{15}|\d{22}$/;
 
 /**
- * 清理快递单号
- * 去除空格、连字符、换行符，转为大写
+ * Sanitize tracking number input
+ * Remove spaces, hyphens, newlines, and convert to uppercase
  */
 function sanitizeTrackingNumber(value: string): string {
   return value.replace(/[\s\-]/g, '').toUpperCase().trim();
 }
 
 /**
- * 验证单号格式（UPS 或 FedEx）
+ * Validate tracking number format (UPS or FedEx)
  */
 function validateTrackingNumber(number: string): { valid: boolean; carrier?: 'UPS' | 'FedEx' } {
   if (UPS_REGEX.test(number)) {
@@ -33,48 +33,48 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const startTime = Date.now();
   
   try {
-    // 解析请求体
+    // Parse request body
     let body;
     try {
       body = await request.json();
     } catch {
       return new Response(
-        JSON.stringify({ error: '无效的请求格式' }),
+        JSON.stringify({ error: 'Invalid request format' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     const { trackingNumber: rawTrackingNumber } = body;
 
-    // 验证输入
+    // Validate input
     if (!rawTrackingNumber || typeof rawTrackingNumber !== 'string') {
       return new Response(
-        JSON.stringify({ error: '请提供有效的快递单号' }),
+        JSON.stringify({ error: 'Please provide a valid tracking number' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // 清理单号
+    // Sanitize tracking number
     const trackingNumber = sanitizeTrackingNumber(rawTrackingNumber);
 
-    // 验证长度
+    // Validate length
     if (trackingNumber.length < 5) {
       return new Response(
-        JSON.stringify({ error: '单号长度太短' }),
+        JSON.stringify({ error: 'Tracking number too short' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // 验证格式
+    // Validate format
     const validation = validateTrackingNumber(trackingNumber);
     
-    // 查询数据库
+    // Query database
     const runtime = locals.runtime;
     
     if (!runtime?.env?.DB) {
       console.error('DB binding not found');
       return new Response(
-        JSON.stringify({ error: '数据库连接失败' }),
+        JSON.stringify({ error: 'Database connection failed' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -95,7 +95,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           carrier: result.carrier,
           shipFromAddress: result.shipFromAddress,
           shipToAddress: result.shipToAddress,
-          createdAt: result.createdAt?.toLocaleString('zh-CN'),
+          createdAt: result.createdAt?.toLocaleString('en-US'),
           responseTimeMs: responseTime,
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -115,7 +115,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     console.error('Check API error:', error);
     return new Response(
       JSON.stringify({ 
-        error: '查询失败，请稍后重试',
+        error: 'Search failed. Please try again later.',
         timestamp: new Date().toISOString(),
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

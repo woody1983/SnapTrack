@@ -3,23 +3,23 @@ import { createClient } from '../../../db/client';
 import { labels } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 
-// UPS 正则: 1Z + 16位字母数字
+// UPS Regex: 1Z + 16 alphanumeric characters
 const UPS_REGEX = /1Z[0-9A-Z]{16}/i;
-// FedEx 正则: 12、15 或 22 位纯数字
+// FedEx Regex: 12, 15, or 22 digits
 const FEDEX_REGEX = /\b(\d{12}|\d{15}|\d{22})\b/g;
 
 /**
- * 从 OCR 文本中提取快递单号
+ * Extract tracking number from OCR text
  */
 function extractTrackingNumber(text: string): { 
   trackingNumber: string | null; 
   carrier: 'UPS' | 'FedEx' | null;
   confidence: number;
 } {
-  // 清理文本
+  // Clean text
   const cleanText = text.toUpperCase();
   
-  // 先尝试匹配 UPS
+  // Try matching UPS first
   const upsMatch = cleanText.match(UPS_REGEX);
   if (upsMatch) {
     return {
@@ -29,10 +29,10 @@ function extractTrackingNumber(text: string): {
     };
   }
   
-  // 再尝试匹配 FedEx
+  // Then try matching FedEx
   const fedexMatches = cleanText.match(FEDEX_REGEX);
   if (fedexMatches) {
-    // 选择最长的匹配（通常是 15 或 22 位）
+    // Select the longest match (usually 15 or 22 digits)
     const bestMatch = fedexMatches.reduce((a, b) => a.length >= b.length ? a : b);
     return {
       trackingNumber: bestMatch,
@@ -49,13 +49,13 @@ function extractTrackingNumber(text: string): {
 }
 
 /**
- * 调用 Workers AI 进行 OCR 识别
+ * Call Workers AI for OCR recognition
  */
-async function performOCR(base64Image: string, env: Env): Promise<string> {
-  // 构建 data URL
+async function performOCR(base64Image: string, env: any): Promise<string> {
+  // Build data URL
   const imageDataUrl = `data:image/jpeg;base64,${base64Image}`;
   
-  // 调用 Workers AI llama-3.2-11b-vision-instruct
+  // Call Workers AI llama-3.2-11b-vision-instruct
   const response = await env.AI.run(
     '@cf/meta/llama-3.2-11b-vision-instruct',
     {
@@ -77,7 +77,7 @@ async function performOCR(base64Image: string, env: Env): Promise<string> {
     }
   );
   
-  // 解析响应
+  // Parse response
   if (response && typeof response === 'object' && 'response' in response) {
     return String(response.response);
   }
@@ -86,7 +86,7 @@ async function performOCR(base64Image: string, env: Env): Promise<string> {
 }
 
 /**
- * 备选 OCR: OCR.space API
+ * Fallback OCR: OCR.space API
  */
 async function performOCRWithOCRSpace(base64Image: string): Promise<string> {
   const apiKey = import.meta.env.OCR_SPACE_API_KEY;
@@ -122,47 +122,47 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const formData = await request.formData();
     const image = formData.get('image');
 
-    // 验证图片
+    // Validate image
     if (!image || !(image instanceof File)) {
       return new Response(
-        JSON.stringify({ error: '请上传图片' }),
+        JSON.stringify({ error: 'Please upload an image' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     if (!['image/jpeg', 'image/png'].includes(image.type)) {
       return new Response(
-        JSON.stringify({ error: '仅支持 JPG/PNG 格式' }),
+        JSON.stringify({ error: 'Only JPG/PNG formats supported' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     if (image.size > 5 * 1024 * 1024) {
       return new Response(
-        JSON.stringify({ error: '图片大小不能超过 5MB' }),
+        JSON.stringify({ error: 'Image size must be under 5MB' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // 读取图片
+    // Read image
     const arrayBuffer = await image.arrayBuffer();
     const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
-    // 获取环境
+    // Get environment
     const runtime = locals.runtime;
     if (!runtime?.env?.DB) {
       return new Response(
-        JSON.stringify({ error: '数据库连接失败' }),
+        JSON.stringify({ error: 'Database connection failed' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // 执行 OCR
+    // Perform OCR
     let ocrText: string;
     let ocrSource: string;
     
     try {
-      // 优先尝试 Workers AI
+      // Try Workers AI first
       if (runtime.env.AI) {
         ocrText = await performOCR(base64, runtime.env);
         ocrSource = 'workers-ai';
@@ -172,7 +172,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     } catch (aiError) {
       console.log('Workers AI failed, falling back:', aiError);
       
-      // 备选方案
+      // Fallback option
       try {
         ocrText = await performOCRWithOCRSpace(base64);
         ocrSource = 'ocr-space';
@@ -180,7 +180,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         return new Response(
           JSON.stringify({ 
             success: false,
-            error: '识别失败，请手动输入',
+            error: 'Recognition failed. Please enter manually.',
             fallback: true,
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -188,14 +188,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
       }
     }
 
-    // 提取单号
+    // Extract tracking number
     const extraction = extractTrackingNumber(ocrText);
 
     if (!extraction.trackingNumber || extraction.confidence < 0.5) {
       return new Response(
         JSON.stringify({ 
           success: false,
-          error: '未能识别到有效的 FedEx/UPS 单号',
+          error: 'No valid FedEx/UPS tracking number found',
           ocrPreview: ocrText.substring(0, 100),
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -204,10 +204,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const { trackingNumber, carrier } = extraction;
 
-    // 数据库操作
+    // Database operations
     const db = createClient(runtime.env.DB);
 
-    // 先查询是否已存在
+    // Check if exists
     const existing = await db.query.labels.findFirst({
       where: eq(labels.trackingNumber, trackingNumber),
     });
@@ -220,7 +220,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           trackingNumber,
           carrier,
           exists: true,
-          createdAt: existing.createdAt?.toLocaleString('zh-CN'),
+          createdAt: existing.createdAt?.toLocaleString('en-US'),
           ocrSource,
           responseTimeMs: responseTime,
         }),
@@ -228,7 +228,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    // 插入新记录
+    // Insert new record
     const now = new Date();
     await db.insert(labels).values({
       trackingNumber,
@@ -246,7 +246,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         trackingNumber,
         carrier,
         exists: false,
-        createdAt: now.toLocaleString('zh-CN'),
+        createdAt: now.toLocaleString('en-US'),
         ocrSource,
         responseTimeMs: responseTime,
       }),
@@ -258,7 +258,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: '处理失败，请重试或手动输入',
+        error: 'Processing failed. Please try again or enter manually.',
         timestamp: new Date().toISOString(),
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
