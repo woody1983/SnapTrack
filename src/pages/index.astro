@@ -1,0 +1,623 @@
+---
+// 主页面 - 快递单号查询与录入
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#4f46e5">
+  <title>SnapTrack - 快递单号查询与录入</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
+    }
+
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .header p {
+      font-size: 0.75rem;
+      opacity: 0.9;
+      margin-top: 0.25rem;
+    }
+
+    /* Main Content */
+    .container {
+      flex: 1;
+      padding: 1rem;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Input Section */
+    .input-section {
+      background: var(--card);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+
+    .input-label {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      align-items: stretch;
+    }
+
+    .tracking-input {
+      flex: 1;
+      padding: 0.875rem 1rem;
+      font-size: 1rem;
+      border: 2px solid var(--border);
+      border-radius: 0.75rem;
+      outline: none;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .tracking-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .camera-btn {
+      width: 3.5rem;
+      height: 3.5rem;
+      background: var(--primary);
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .camera-btn:active {
+      transform: scale(0.95);
+      background: var(--primary-dark);
+    }
+
+    .camera-btn svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      color: white;
+    }
+
+    .search-btn {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .search-btn:active {
+      transform: scale(0.98);
+      background: var(--primary-dark);
+    }
+
+    .search-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Status Card */
+    .status-card {
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+      display: none;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .status-card.show {
+      display: block;
+    }
+
+    .status-card.loading {
+      display: block;
+      background: #f1f5f9;
+    }
+
+    .status-card.success {
+      background: #ecfdf5;
+      border: 2px solid var(--success);
+    }
+
+    .status-card.error {
+      background: #fef2f2;
+      border: 2px solid var(--error);
+    }
+
+    .status-icon {
+      width: 4rem;
+      height: 4rem;
+      margin: 0 auto 1rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .success .status-icon {
+      background: var(--success);
+    }
+
+    .error .status-icon {
+      background: var(--error);
+    }
+
+    .status-icon svg {
+      width: 2rem;
+      height: 2rem;
+      color: white;
+    }
+
+    .status-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .success .status-title {
+      color: var(--success);
+    }
+
+    .error .status-title {
+      color: var(--error);
+    }
+
+    .status-message {
+      color: var(--text-light);
+      font-size: 0.875rem;
+    }
+
+    .status-detail {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: rgba(255,255,255,0.7);
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 3rem;
+      height: 3rem;
+      margin: 0 auto 1rem;
+      border: 3px solid #e2e8f0;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Hidden file input */
+    .file-input {
+      display: none;
+    }
+
+    /* Instructions */
+    .instructions {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .instructions h3 {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .instruction-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      font-size: 0.875rem;
+    }
+
+    .instruction-icon {
+      width: 2rem;
+      height: 2rem;
+      background: var(--bg);
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .instruction-icon svg {
+      width: 1rem;
+      height: 1rem;
+      color: var(--primary);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>📦 SnapTrack</h1>
+    <p>快递单号查询与录入</p>
+  </header>
+
+  <main class="container">
+    <!-- 输入区域 -->
+    <section class="input-section">
+      <label class="input-label">请输入 FedEx / UPS 单号</label>
+      <div class="input-wrapper">
+        <input 
+          type="text" 
+          class="tracking-input" 
+          id="trackingInput"
+          placeholder="如: 1Z1234567890123456"
+          inputmode="text"
+          autocomplete="off"
+        >
+        <button class="camera-btn" id="cameraBtn" title="拍照录入">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+          </svg>
+        </button>
+      </div>
+      <button class="search-btn" id="searchBtn">查询</button>
+    </section>
+
+    <!-- 状态卡片 -->
+    <section class="status-card loading" id="statusLoading">
+      <div class="spinner"></div>
+      <div class="status-title">查询中...</div>
+      <div class="status-message">正在检查单号状态</div>
+    </section>
+
+    <section class="status-card success" id="statusSuccess">
+      <div class="status-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+        </svg>
+      </div>
+      <div class="status-title">已入库</div>
+      <div class="status-message">该单号已在系统中</div>
+      <div class="status-detail" id="successDetail"></div>
+    </section>
+
+    <section class="status-card error" id="statusError">
+      <div class="status-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </div>
+      <div class="status-title">未入库</div>
+      <div class="status-message">该单号尚未录入系统</div>
+      <div class="status-detail">点击下方相机按钮拍照录入</div>
+    </section>
+
+    <!-- 使用说明 -->
+    <section class="instructions">
+      <h3>使用说明</h3>
+      <div class="instruction-item">
+        <div class="instruction-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+        </div>
+        <span>输入单号后点击查询，1秒显示结果</span>
+      </div>
+      <div class="instruction-item">
+        <div class="instruction-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+          </svg>
+        </div>
+        <span>点击相机图标拍照，自动识别单号</span>
+      </div>
+      <div class="instruction-item">
+        <div class="instruction-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+          </svg>
+        </div>
+        <span>自动去重，重复单号会提示已入库时间</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    SnapTrack MVP v0.0.1 · Cloudflare Edge
+  </footer>
+
+  <!-- 隐藏的文件输入（用于相机） -->
+  <input 
+    type="file" 
+    class="file-input" 
+    id="fileInput"
+    accept="image/jpeg,image/png"
+    capture="environment"
+  >
+
+  <script>
+    // DOM 元素
+    const trackingInput = document.getElementById('trackingInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const fileInput = document.getElementById('fileInput');
+    const statusLoading = document.getElementById('statusLoading');
+    const statusSuccess = document.getElementById('statusSuccess');
+    const statusError = document.getElementById('statusError');
+    const successDetail = document.getElementById('successDetail');
+
+    // 隐藏所有状态卡片
+    function hideAllStatus() {
+      statusLoading.classList.remove('show');
+      statusSuccess.classList.remove('show');
+      statusError.classList.remove('show');
+    }
+
+    // 显示加载状态
+    function showLoading() {
+      hideAllStatus();
+      statusLoading.classList.add('show');
+    }
+
+    // 显示成功状态
+    function showSuccess(timestamp) {
+      hideAllStatus();
+      successDetail.textContent = `入库时间: ${timestamp}`;
+      statusSuccess.classList.add('show');
+    }
+
+    // 显示未入库状态
+    function showError() {
+      hideAllStatus();
+      statusError.classList.add('show');
+    }
+
+    // 清理单号输入
+    function sanitizeTrackingNumber(value) {
+      return value.replace(/[\s\-]/g, '').toUpperCase().trim();
+    }
+
+    // 查询单号
+    async function checkTracking() {
+      const rawValue = trackingInput.value;
+      const trackingNumber = sanitizeTrackingNumber(rawValue);
+
+      if (!trackingNumber) {
+        alert('请输入快递单号');
+        return;
+      }
+
+      showLoading();
+
+      try {
+        const response = await fetch('/api/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ trackingNumber }),
+        });
+
+        const data = await response.json();
+
+        if (data.exists) {
+          showSuccess(data.createdAt);
+        } else {
+          showError();
+        }
+      } catch (error) {
+        console.error('查询失败:', error);
+        alert('查询失败，请检查网络后重试');
+        hideAllStatus();
+      }
+    }
+
+    /**
+     * 使用 Canvas 压缩图片
+     * @param {File} file - 原始图片文件
+     * @param {number} maxWidth - 最大宽度（默认1024）
+     * @returns {Promise<Blob>}
+     */
+    async function compressImage(file, maxWidth = 1024) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          
+          // 计算缩放后的尺寸
+          let { width, height } = img;
+          if (width > maxWidth) {
+            height = Math.round(height * maxWidth / width);
+            width = maxWidth;
+          }
+          
+          // 创建 Canvas
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          
+          // 绘制图片
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // 转换为 Blob
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error('Canvas to Blob failed'));
+              }
+            },
+            'image/jpeg',
+            0.85
+          );
+        };
+        
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('Failed to load image'));
+        };
+        
+        img.src = url;
+      });
+    }
+
+    // 处理图片上传（OCR）
+    async function handleImageUpload(file) {
+      if (!file) return;
+
+      // 验证文件大小 (< 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('图片过大，请选择小于 5MB 的图片');
+        return;
+      }
+
+      showLoading();
+
+      try {
+        // 压缩图片
+        const compressed = await compressImage(file, 1024);
+        
+        // 创建新的 File 对象
+        const compressedFile = new File([compressed], file.name, {
+          type: 'image/jpeg',
+        });
+
+        const formData = new FormData();
+        formData.append('image', compressedFile);
+
+        const response = await fetch('/api/upload-ocr', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.trackingNumber) {
+          trackingInput.value = data.trackingNumber;
+          showSuccess(data.createdAt);
+        } else {
+          alert(data.error || '识别失败，请手动输入');
+          hideAllStatus();
+        }
+      } catch (error) {
+        console.error('上传失败:', error);
+        alert('识别失败，请手动输入');
+        hideAllStatus();
+      }
+    }
+
+    // 事件监听
+    searchBtn.addEventListener('click', checkTracking);
+
+    trackingInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        checkTracking();
+      }
+    });
+
+    cameraBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        handleImageUpload(file);
+        // 清空 input 以便可以重复选择同一文件
+        fileInput.value = '';
+      }
+    });
+
+    // 输入时自动转大写
+    trackingInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.toUpperCase();
+    });
+  </script>
+</body>
+</html>

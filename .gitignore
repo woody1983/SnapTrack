@@ -1,0 +1,38 @@
+# Build output
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Wrangler
+.wrangler/
+.dev.vars
+
+# Local database
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Preview file
+preview.html
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -1,0 +1,17 @@
+# Cloudflare Pages 配置
+# Pages 会自动检测 dist/_worker.js 目录
+
+name = "snaptrack"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# 数据库绑定 (D1) - 生产环境
+[[d1_databases]]
+binding = "DB"
+database_name = "snap"
+database_id = "e2b197a7-3788-4aa0-853e-40943b13b8b3"
+
+# AI 绑定 (Workers AI)
+[ai]
+binding = "AI"

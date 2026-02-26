@@ -1,0 +1,24 @@
+{
+  "name": "snaptrack",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12.6.12",
+    "@cloudflare/workers-types": "^4.20260305.0",
+    "astro": "^5.17.1",
+    "drizzle-orm": "^0.45.1"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.9",
+    "better-sqlite3": "^12.6.2"
+  }
+}
