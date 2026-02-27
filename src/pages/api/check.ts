@@ -95,7 +95,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           carrier: result.carrier,
           shipFromAddress: result.shipFromAddress,
           shipToAddress: result.shipToAddress,
-          createdAt: result.createdAt?.toLocaleString('en-US'),
+          createdAt: result.createdAt?.toISOString(),
           responseTimeMs: responseTime,
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }

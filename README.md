@@ -1,260 +1,74 @@
 # SnapTrack 📦
 
-A minimalist package tracking and entry tool (MVP v1.0)
+SnapTrack is a premium, edge-native package tracking entry system designed for speed, privacy, and simplicity. Built with **Astro** and **Cloudflare D1**, it leverages high-performance barcode scanning to streamline logistics tracking directly from the edge.
 
-> 1-second lookup + 5-second scan-to-enter, zero server costs, running entirely on Cloudflare Edge
+![SnapTrack Dashboard](file:///Users/jiangxu/.gemini/antigravity/brain/bcbe29e2-015f-4820-9a8c-1cbb9789e57d/snaptrack_dashboard_mockup_1772170822407.png)
 
-## Core Features
+## ✨ Features
 
-| Feature | Description | Response Time |
-|---------|-------------|---------------|
-| 🔍 **Manual Search** | Enter FedEx/UPS tracking number, instantly shows "In System" or "Not Found" | < 50ms |
-| 📸 **Scan to Enter** | Take a photo to auto-extract tracking number and add to database | < 6s |
-| 🔄 **Auto Deduplication** | Duplicate numbers show original entry time | - |
-| 📱 **Mobile First** | Works on mobile browsers, no login required | < 800ms |
+- **Barcode-First Experience**: High-speed, real-time tracking number scanning using **ZXing**.
+- **Intelligent Carrier Detection**: Automatically identifies **UPS** (1Z...) and **FedEx** (12-digit) formats.
+- **Glassmorphism UI**: A stunning, responsive interface with vibrant gradients and smooth micro-animations.
+- **Edge Native**: Zero-latency database operations powered by **Cloudflare D1** and **Workers**.
+- **Privacy Centric**: All barcode processing occurs locally on your device; only essential metadata is stored.
+- **Efficient History**: Quick-access scan history with double-click copy functionality and carrier badging.
 
-## Tech Stack
+## 🚀 Technical Stack
 
-- **Framework**: [Astro](https://astro.build/) + `@astrojs/cloudflare`
-- **Platform**: **Cloudflare Pages** (Functions + Static Assets)
-- **Database**: Cloudflare D1 (Serverless SQLite)
+- **Framework**: [Astro 5](https://astro.build/)
+- **Runtime**: [Cloudflare Workers](https://workers.cloudflare.com/)
+- **Database**: [Cloudflare D1](https://developers.cloudflare.com/d1/)
 - **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
-- **AI/OCR**: Cloudflare Workers AI (llama-3.2-11b-vision)
+- **Barcode Engine**: [@zxing/browser](https://github.com/zxing-js/browser)
+- **Styling**: Vanilla CSS (Modern CSS Variables & Glassmorphism)
 
-## Why Cloudflare Pages?
+---
 
-| Feature | Pages | Workers |
-|---------|-------|---------|
-| Static Assets | ✅ CDN Accelerated | ❌ Requires R2 |
-| API Functions | ✅ Pages Functions | ✅ Workers |
-| Auto Build & Deploy | ✅ Git Integration | ❌ CLI Only |
-| Preview Environments | ✅ Auto-generated per PR | ❌ |
-| Custom Domain | ✅ Free | Paid |
+## 📸 Guided Tour
 
-**Pages Functions = Workers + Auto Routing + Static Asset Hosting**
+````carousel
+![Scanner Interface](file:///Users/jiangxu/.gemini/antigravity/brain/bcbe29e2-015f-4820-9a8c-1cbb9789e57d/snaptrack_scanner_mockup_1772170834711.png)
+<!-- slide -->
+![Detection Success](file:///Users/jiangxu/.gemini/antigravity/brain/bcbe29e2-015f-4820-9a8c-1cbb9789e57d/snaptrack_result_modal_mockup_1772170850626.png)
+````
 
-## Quick Start
+### **1. Real-time Scanning**
+Tap the barcode icon to launch the edge-to-edge scanner. The system uses a high-resolution video feed to identify Code 128 and ITF barcodes instantly.
 
-### 1. Prerequisites
+### **2. Smart Confirmation**
+Once a barcode is detected, SnapTrack strips away the technical noise (like the long FedEx application identifiers) and presents the clean 12 or 18-digit tracking number for your approval.
 
+### **3. Local History**
+Your recent scans are stored in a minimalist table. Double-click any entry to instantly copy it to your clipboard or sync it with the search bar.
+
+---
+
+## 🛠️ Development Setup
+
+### **Prerequisites**
+- [Node.js](https://nodejs.org/) (v18+)
+- [Wrangler](https://developers.cloudflare.com/workers/wrangler/) (Cloudflare CLI)
+
+### **Installation**
 ```bash
-# Install Wrangler CLI
-npm install -g wrangler
-
-# Login to Cloudflare
-npx wrangler login
-```
-
-### 2. Create D1 Database
-
-```bash
-# Create database
-npx wrangler d1 create snaptrack-db
-
-# Example output:
-# ✅ Successfully created DB 'snaptrack-db'
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "snaptrack-db"
-# database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-
-# Copy database_id to wrangler.toml
-```
-
-### 3. Configure Project
-
-```bash
-# Clone project
-git clone https://github.com/woody1983/SnapTrack.git
-cd SnapTrack
-
 # Install dependencies
 npm install
 
-# Edit wrangler.toml with your database_id
-vim wrangler.toml
-```
-
-### 4. Database Migration
-
-```bash
-# Generate migrations
+# Initialize local D1 database
 npm run db:generate
-
-# Apply to D1
-npx wrangler d1 migrations apply snaptrack-db
+npm run db:migrate
 ```
 
-### 5. Deploy to Pages
-
-**Option 1: One-click deploy script**
+### **Running Locally**
 ```bash
-chmod +x deploy.sh
-./deploy.sh
+npm run dev
 ```
 
-**Option 2: Wrangler CLI**
-```bash
-npm run build
-npx wrangler pages deploy dist --project-name=snaptrack
-```
+## 🔒 Privacy & Security
 
-**Option 3: GitHub Actions Auto-deploy**
-1. Set Secrets in GitHub repository:
-   - `CLOUDFLARE_API_TOKEN` - [Get API Token](https://dash.cloudflare.com/profile/api-tokens)
-   - `CLOUDFLARE_ACCOUNT_ID` - Your account ID
-2. Push to `main` branch triggers auto-deployment
+SnapTrack is designed with a **privacy-first** mindset. Tracking numbers are identifiers for shipments but can be sensitive. 
+- **Local Processing**: Barcode decoding happens entirely in the browser. No image data is ever sent to the server.
+- **Minimal Storage**: We only store the tracking number, carrier type, and timestamp. No personally identifiable information (PII) is captured from labels.
 
-## Project Structure
-
-```
-├── src/
-│   ├── pages/
-│   │   ├── index.astro           # Main page (search + entry)
-│   │   └── api/                  # API Functions
-│   │       ├── check.ts          # Search tracking number
-│   │       ├── upload-ocr.ts     # Photo recognition
-│   │       └── health.ts         # Health check
-│   └── env.d.ts                  # Type definitions
-├── db/
-│   ├── schema.ts                 # Database schema
-│   ├── client.ts                 # Database client
-│   └── migrations/               # Migration files
-├── public/
-│   └── _routes.json              # Pages routing config
-├── .github/workflows/
-│   └── deploy.yml                # GitHub Actions
-├── astro.config.mjs              # Astro config (mode: 'directory')
-├── wrangler.toml                 # Cloudflare config
-├── deploy.sh                     # Deploy script
-└── README.md
-```
-
-## Database Schema
-
-```typescript
-// labels table
-{
-  id: number;                    // Auto-increment primary key
-  trackingNumber: string;        // Tracking number (UNIQUE)
-  carrier: 'UPS' | 'FedEx';      // Carrier
-  shipFromAddress?: string;      // Ship from address
-  shipToAddress?: string;        // Ship to address
-  createdAt: Date;               // Entry time
-}
-```
-
-## API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `GET /` | | Main page |
-| `GET /api/health` | | Health check |
-| `POST /api/check` | | Search tracking number status |
-| `POST /api/upload-ocr` | | Upload image for OCR and entry |
-
-### Request Example
-
-```bash
-# Search tracking number
-curl -X POST https://snaptrack.pages.dev/api/check \
-  -H "Content-Type: application/json" \
-  -d '{"trackingNumber": "1Z999AA10123456784"}'
-
-# Response
-{
-  "exists": true,
-  "trackingNumber": "1Z999AA10123456784",
-  "carrier": "UPS",
-  "createdAt": "2/25/2026, 7:20:00 PM"
-}
-```
-
-## Development Phases
-
-- [x] Phase 1: Infrastructure (Astro + D1 + Drizzle)
-- [x] Phase 2: Core UI (Mobile-first)
-- [x] Phase 3: Manual Search (< 50ms)
-- [x] Phase 4: Photo OCR (Workers AI)
-
-## Performance Targets
-
-| Metric | Target | Actual |
-|--------|--------|--------|
-| Page Load | < 800ms | ✅ ~300ms (CDN) |
-| Search Response | < 50ms | ✅ ~20ms (D1 Edge) |
-| Photo Processing | < 6s | ✅ ~3s (Workers AI) |
-
-## Cost
-
-Everything runs within Cloudflare free tier:
-
-| Service | Free Tier | SnapTrack Usage |
-|---------|-----------|-----------------|
-| **Pages** | Unlimited requests, 500 builds/month | ~10 builds/month ✅ |
-| **D1** | 5M reads/day, 100K writes/day | < 1K/day ✅ |
-| **Workers AI** | 10K neurons/day | < 100/day ✅ |
-
-## Configuration
-
-### wrangler.toml
-
-```toml
-name = "snaptrack"
-pages_build_output_dir = "dist"
-compatibility_date = "2024-09-23"
-compatibility_flags = ["nodejs_compat"]
-
-[[d1_databases]]
-binding = "DB"
-database_name = "snaptrack-db"
-database_id = "your-database-id"
-
-[ai]
-binding = "AI"
-```
-
-### astro.config.mjs
-
-```javascript
-import cloudflare from '@astrojs/cloudflare';
-
-export default defineConfig({
-  output: 'server',
-  adapter: cloudflare({
-    mode: 'directory',      // Pages directory mode
-    functionPerRoute: true, // One Function per route
-  }),
-});
-```
-
-## Troubleshooting
-
-### View Logs
-
-```bash
-# Real-time logs
-npx wrangler pages deployment tail --project-name=snaptrack
-```
-
-### Local Simulation
-
-```bash
-# Simulate Pages environment locally
-npx wrangler pages dev dist --d1 DB --ai AI
-```
-
-### Common Issues
-
-**Q: API returns 404 after deployment?**
-A: Check if `dist/_worker.js/` directory exists, Pages auto-detects it.
-
-**Q: Database connection failed?**
-A: Verify `database_id` in `wrangler.toml` and that migrations were applied.
-
-**Q: Workers AI unavailable?**
-A: Enable Workers AI in Cloudflare Dashboard.
-
-## License
-
-MIT
+---
+*Created with ❤️ on Cloudflare Edge.*

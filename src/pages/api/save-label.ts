@@ -103,7 +103,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           trackingNumber,
           carrier: existing.carrier,
           exists: true,
-          createdAt: existing.createdAt?.toLocaleString('en-US'),
+          createdAt: existing.createdAt?.toISOString(),
           responseTimeMs: responseTime,
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -128,7 +128,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         trackingNumber,
         carrier: validation.carrier,
         exists: false,
-        createdAt: now.toLocaleString('en-US'),
+        createdAt: now.toISOString(),
         responseTimeMs: responseTime,
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
