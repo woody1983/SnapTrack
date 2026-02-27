@@ -2,7 +2,7 @@
 
 SnapTrack is a premium, edge-native package tracking entry system designed for speed, privacy, and simplicity. Built with **Astro** and **Cloudflare D1**, it leverages high-performance barcode scanning to streamline logistics tracking directly from the edge.
 
-![SnapTrack Dashboard](file:///Users/jiangxu/.gemini/antigravity/brain/bcbe29e2-015f-4820-9a8c-1cbb9789e57d/snaptrack_dashboard_mockup_1772170822407.png)
+![SnapTrack Dashboard](./public/img/snaptrack_dashboard_mockup_1772170822407.png)
 
 ## ✨ Features
 
@@ -27,9 +27,9 @@ SnapTrack is a premium, edge-native package tracking entry system designed for s
 ## 📸 Guided Tour
 
 ````carousel
-![Scanner Interface](file:///Users/jiangxu/.gemini/antigravity/brain/bcbe29e2-015f-4820-9a8c-1cbb9789e57d/snaptrack_scanner_mockup_1772170834711.png)
+![Scanner Interface](./public/img/snaptrack_scanner_mockup_1772170834711.png)
 <!-- slide -->
-![Detection Success](file:///Users/jiangxu/.gemini/antigravity/brain/bcbe29e2-015f-4820-9a8c-1cbb9789e57d/snaptrack_result_modal_mockup_1772170850626.png)
+![Detection Success](./public/img/snaptrack_result_modal_mockup_1772170850626.png)
 ````
 
 ### **1. Real-time Scanning**
