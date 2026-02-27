@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '../../../db/client';
-import { labels } from '../../../db/schema';
+import { labels, pinnedTrackings } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 
 // UPS format: 1Z + 16 alphanumeric characters
@@ -119,6 +119,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       shipperLastName: shipperLastName || null,
       createdAt: now,
     });
+
+    // Auto-unpin if any role had this tracking number pinned
+    await db.delete(pinnedTrackings).where(eq(pinnedTrackings.trackingNumber, trackingNumber));
 
     const responseTime = Date.now() - startTime;
 
