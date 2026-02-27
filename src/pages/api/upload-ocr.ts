@@ -49,6 +49,60 @@ function extractTrackingNumber(text: string): {
 }
 
 /**
+ * Extract shipper name from OCR text
+ * Look for "From:" or "Shipper:" fields
+ */
+function extractShipperName(text: string): {
+  firstName: string | null;
+  lastName: string | null;
+} {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  
+  // Look for patterns like "From:", "Shipper:", "Sender:"
+  const shipperKeywords = ['FROM:', 'SHIPPER:', 'SENDER:', 'FROM', 'SHIPPER'];
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].toUpperCase();
+    
+    // Check if line contains shipper keyword
+    for (const keyword of shipperKeywords) {
+      if (line.includes(keyword)) {
+        // Try next line(s) for name
+        for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
+          const nameLine = lines[j].trim();
+          // Skip empty, address-like lines, or lines with numbers
+          if (!nameLine || /^[0-9]/.test(nameLine) || /(ST|AVE|ROAD|RD|BLVD|CITY|STATE|ZIP)/i.test(nameLine)) {
+            continue;
+          }
+          // Look for "First Last" pattern
+          const nameMatch = nameLine.match(/^([A-Za-z]+)\s+([A-Za-z\-]+)$/);
+          if (nameMatch) {
+            return {
+              firstName: nameMatch[1].charAt(0).toUpperCase() + nameMatch[1].slice(1).toLowerCase(),
+              lastName: nameMatch[2].charAt(0).toUpperCase() + nameMatch[2].slice(1).toLowerCase(),
+            };
+          }
+        }
+      }
+    }
+  }
+  
+  // Fallback: look for common name patterns in the first few lines
+  for (let i = 0; i < Math.min(10, lines.length); i++) {
+    const line = lines[i].trim();
+    // Match "John Smith" or "John D. Smith" patterns
+    const nameMatch = line.match(/^([A-Za-z]{2,20})\s+([A-Z]\.?\s+)?([A-Za-z\-]{2,20})$/);
+    if (nameMatch && !/(TRACKING|LABEL|SHIP|ORDER)/i.test(line)) {
+      const firstName = nameMatch[1].charAt(0).toUpperCase() + nameMatch[1].slice(1).toLowerCase();
+      const lastName = nameMatch[3].charAt(0).toUpperCase() + nameMatch[3].slice(1).toLowerCase();
+      return { firstName, lastName };
+    }
+  }
+  
+  return { firstName: null, lastName: null };
+}
+
+/**
  * Call Workers AI for OCR recognition
  */
 async function performOCR(base64Image: string, env: any): Promise<string> {
@@ -65,7 +119,7 @@ async function performOCR(base64Image: string, env: any): Promise<string> {
           content: [
             {
               type: 'text',
-              text: 'Extract the tracking number from this shipping label. Look for UPS (starts with 1Z) or FedEx (12-22 digits) tracking numbers. Return ONLY the tracking number, nothing else.',
+              text: 'Extract information from this shipping label. 1) Find the tracking number (UPS starts with 1Z, FedEx is 12-22 digits). 2) Find the shipper/sender name (usually under "From:"). Return in this format:\nTracking: [number]\nShipper First: [first name]\nShipper Last: [last name]',
             },
             {
               type: 'image',
@@ -137,9 +191,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    if (image.size > 5 * 1024 * 1024) {
+    // Cloudflare Pages has 5MB request body limit
+    // Frontend should compress to < 4.5MB
+    if (image.size > 4.8 * 1024 * 1024) {
       return new Response(
-        JSON.stringify({ error: 'Image size must be under 5MB' }),
+        JSON.stringify({ error: 'Image too large. Please use a smaller image or retake photo from closer distance.' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -203,6 +259,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     const { trackingNumber, carrier } = extraction;
+    
+    // Extract shipper name
+    const shipperName = extractShipperName(ocrText);
 
     // Database operations
     const db = createClient(runtime.env.DB);
@@ -235,6 +294,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       carrier: carrier!,
       shipFromAddress: null,
       shipToAddress: null,
+      shipperFirstName: shipperName.firstName,
+      shipperLastName: shipperName.lastName,
       createdAt: now,
     });
 
@@ -246,6 +307,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
         trackingNumber,
         carrier,
         exists: false,
+        shipperFirstName: shipperName.firstName,
+        shipperLastName: shipperName.lastName,
         createdAt: now.toLocaleString('en-US'),
         ocrSource,
         responseTimeMs: responseTime,

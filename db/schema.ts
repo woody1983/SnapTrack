@@ -6,6 +6,8 @@ export const labels = sqliteTable('labels', {
   carrier: text('carrier').notNull(), // 'UPS' | 'FedEx'
   shipFromAddress: text('ship_from_address'), // 可空
   shipToAddress: text('ship_to_address'), // 可空
+  shipperFirstName: text('shipper_first_name'), // 寄件人名
+  shipperLastName: text('shipper_last_name'),   // 寄件人姓
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 

@@ -14,11 +14,14 @@
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
     "@cloudflare/workers-types": "^4.20260305.0",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
     "astro": "^5.17.1",
-    "drizzle-orm": "^0.45.1"
+    "drizzle-orm": "^0.45.1",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.9",
-    "better-sqlite3": "^12.6.2"
+    "better-sqlite3": "^12.6.2",
+    "drizzle-kit": "^0.31.9"
   }
 }
