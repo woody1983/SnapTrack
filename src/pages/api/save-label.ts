@@ -10,14 +10,13 @@ const FEDEX_REGEX = /^\d{12}|\d{15}|\d{22}$/;
 
 /**
  * Sanitize tracking number input
- * Remove spaces, hyphens, newlines, and convert to uppercase
  */
 function sanitizeTrackingNumber(value: string): string {
   return value.replace(/[\s\-]/g, '').toUpperCase().trim();
 }
 
 /**
- * Validate tracking number format (UPS or FedEx)
+ * Validate tracking number format
  */
 function validateTrackingNumber(number: string): { valid: boolean; carrier?: 'UPS' | 'FedEx' } {
   if (UPS_REGEX.test(number)) {
@@ -44,12 +43,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    const { trackingNumber: rawTrackingNumber } = body;
+    const { 
+      trackingNumber: rawTrackingNumber,
+      shipperFirstName,
+      shipperLastName,
+    } = body;
 
     // Validate input
     if (!rawTrackingNumber || typeof rawTrackingNumber !== 'string') {
       return new Response(
-        JSON.stringify({ error: 'Please provide a valid tracking number' }),
+        JSON.stringify({ error: 'Please provide a tracking number' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -67,8 +70,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Validate format
     const validation = validateTrackingNumber(trackingNumber);
-    
-    // Query database
+    if (!validation.valid) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid tracking number format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check database binding
     const runtime = locals.runtime;
     
     if (!runtime?.env?.DB) {
@@ -81,41 +90,55 @@ export const POST: APIRoute = async ({ request, locals }) => {
     
     const db = createClient(runtime.env.DB);
 
-    const result = await db.query.labels.findFirst({
+    // Check if exists
+    const existing = await db.query.labels.findFirst({
       where: eq(labels.trackingNumber, trackingNumber),
     });
 
-    const responseTime = Date.now() - startTime;
-
-    if (result) {
+    if (existing) {
+      const responseTime = Date.now() - startTime;
       return new Response(
         JSON.stringify({
+          success: true,
+          trackingNumber,
+          carrier: existing.carrier,
           exists: true,
-          trackingNumber: result.trackingNumber,
-          carrier: result.carrier,
-          shipFromAddress: result.shipFromAddress,
-          shipToAddress: result.shipToAddress,
-          createdAt: result.createdAt?.toISOString(),
-          responseTimeMs: responseTime,
-        }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
-      );
-    } else {
-      return new Response(
-        JSON.stringify({
-          exists: false,
-          trackingNumber: trackingNumber,
-          suggestedCarrier: validation.carrier || null,
+          createdAt: existing.createdAt?.toISOString(),
           responseTimeMs: responseTime,
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    // Insert new record
+    const now = new Date();
+    await db.insert(labels).values({
+      trackingNumber,
+      carrier: validation.carrier!,
+      shipperFirstName: shipperFirstName || null,
+      shipperLastName: shipperLastName || null,
+      createdAt: now,
+    });
+
+    const responseTime = Date.now() - startTime;
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        trackingNumber,
+        carrier: validation.carrier,
+        exists: false,
+        createdAt: now.toISOString(),
+        responseTimeMs: responseTime,
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+
   } catch (error) {
-    console.error('Check API error:', error);
+    console.error('Save label API error:', error);
     return new Response(
       JSON.stringify({ 
-        error: 'Search failed. Please try again later.',
+        error: 'Save failed. Please try again later.',
         timestamp: new Date().toISOString(),
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
