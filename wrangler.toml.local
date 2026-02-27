@@ -1,0 +1,12 @@
+# Cloudflare Pages 本地开发配置
+
+name = "snaptrack"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# 本地 D1 数据库绑定
+[[d1_databases]]
+binding = "DB"
+database_name = "snap-local"
+database_id = "00000000-0000-0000-0000-000000000000"
