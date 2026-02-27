@@ -436,6 +436,9 @@
       .col-tracking {
         flex: 1;
         min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
       }
 
       .col-date {
@@ -470,7 +473,6 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        display: block;
       }
 
       .label-meta {
@@ -978,12 +980,289 @@
         margin-left: 8px;
         vertical-align: middle;
       }
+
+      /* ── Header role badge ───────────────────────────────────────── */
+      .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .header-brand { flex: 1; text-align: left; }
+      .header-center { flex: 1; text-align: center; }
+      .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; }
+
+      .role-chip {
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 0.2rem 0.6rem;
+        border-radius: 99px;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .logout-btn {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        border-radius: 0.5rem;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .logout-btn:hover { background: rgba(255,255,255,0.25); }
+
+      /* ── Pin button ──────────────────────────────────────────────── */
+      .pin-btn {
+        margin-top: 1rem;
+        padding: 0.6rem 1.25rem;
+        background: #fef3c7;
+        border: 1.5px solid #fcd34d;
+        color: #92400e;
+        border-radius: 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: none;
+      }
+
+      .pin-btn:hover { background: #fde68a; }
+
+      /* ── Pinned items in list ─────────────────────────────────────── */
+      .label-item.pinned {
+        background: #fffbeb;
+      }
+
+      .label-item.pinned .label-tracking {
+        color: #92400e;
+      }
+
+      .pin-icon { font-size: 0.7rem; margin-right: 0.2rem; }
+
+      .unpin-btn {
+        background: none;
+        border: none;
+        color: #d97706;
+        font-size: 0.7rem;
+        cursor: pointer;
+        padding: 0.1rem 0.3rem;
+        border-radius: 0.25rem;
+        white-space: nowrap;
+      }
+
+      .unpin-btn:hover { background: #fde68a; }
+
+      .delete-entry-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+        opacity: 0.45;
+        padding: 0 0.2rem;
+        vertical-align: middle;
+        transition: opacity 0.15s;
+      }
+
+      .delete-entry-btn:hover { opacity: 1; }
+
+      .pin-status-badge {
+        font-size: 0.65rem;
+        color: #d97706;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      /* ── Auth Overlay ───────────────────────────────────────────── */
+      .auth-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.72);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+
+      .auth-overlay.hidden { display: none; }
+
+      .auth-modal {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem 1.75rem 1.75rem;
+        width: 100%;
+        max-width: 340px;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.28);
+        text-align: center;
+      }
+
+      .auth-logo { font-size: 2.25rem; margin-bottom: 0.4rem; }
+
+      .auth-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.2rem;
+      }
+
+      .auth-subtitle {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+      }
+
+      .auth-roles {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .auth-role-btn {
+        padding: 1rem 0.5rem;
+        border: 2px solid var(--border);
+        border-radius: 1rem;
+        background: white;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-light);
+      }
+
+      .auth-role-btn .role-icon {
+        font-size: 1.75rem;
+        display: block;
+        margin-bottom: 0.4rem;
+      }
+
+      .auth-role-btn:hover, .auth-role-btn.selected {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: #f0f0ff;
+      }
+
+      .auth-step2 { display: none; }
+      .auth-step2.visible { display: block; }
+
+      .auth-selected-label {
+        font-size: 0.78rem;
+        color: var(--text-light);
+        margin-bottom: 0.9rem;
+        padding: 0.45rem 0.75rem;
+        background: #f8fafc;
+        border-radius: 0.5rem;
+      }
+
+      .auth-selected-label strong { color: var(--primary); }
+
+      .auth-pw-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+        border: 2px solid var(--border);
+        border-radius: 0.75rem;
+        outline: none;
+        margin-bottom: 0.6rem;
+        transition: border-color 0.15s;
+        box-sizing: border-box;
+        letter-spacing: 0.08em;
+      }
+
+      .auth-pw-input:focus { border-color: var(--primary); }
+
+      .auth-submit-btn {
+        width: 100%;
+        padding: 0.875rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+        margin-bottom: 0.65rem;
+      }
+
+      .auth-submit-btn:hover { background: var(--primary-dark); }
+      .auth-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+      .auth-back-link {
+        background: none;
+        border: none;
+        color: var(--text-light);
+        font-size: 0.78rem;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      .auth-error {
+        font-size: 0.78rem;
+        color: var(--error);
+        min-height: 1.1rem;
+        margin-bottom: 0.4rem;
+      }
     </style>
   </head>
   <body>
+    <!-- Auth Overlay -->
+    <div class="auth-overlay" id="authOverlay">
+      <div class="auth-modal">
+        <div class="auth-logo">📦</div>
+        <div class="auth-title">SnapTrack</div>
+        <div class="auth-subtitle">Select your role to continue</div>
+
+        <!-- Step 1: role cards -->
+        <div id="authStep1">
+          <div class="auth-roles">
+            <button class="auth-role-btn" id="authRoleSD">
+              <span class="role-icon">🎧</span>
+              Service Desk
+            </button>
+            <button class="auth-role-btn" id="authRoleWH">
+              <span class="role-icon">📦</span>
+              Warehouser
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: password -->
+        <div class="auth-step2" id="authStep2">
+          <div class="auth-selected-label" id="authRoleLabel"></div>
+          <input
+            class="auth-pw-input"
+            type="password"
+            id="authPwInput"
+            placeholder="Enter password"
+            maxlength="30"
+            autocomplete="current-password"
+          />
+          <div class="auth-error" id="authError"></div>
+          <button class="auth-submit-btn" id="authSubmitBtn">Verify</button>
+          <button class="auth-back-link" id="authBackBtn">← Change role</button>
+        </div>
+      </div>
+    </div>
     <header class="header">
-      <h1>📦 SnapTrack</h1>
-      <p>Package Tracking & Entry</p>
+      <div class="header-inner">
+        <div class="header-brand"></div>
+        <div class="header-center">
+          <h1>📦 SnapTrack</h1>
+          <p>Package Tracking & Entry</p>
+        </div>
+        <div class="header-right">
+          <span class="role-chip" id="roleChip" style="display:none"></span>
+          <button class="logout-btn" id="logoutBtn" style="display:none">Exit</button>
+        </div>
+      </div>
     </header>
 
     <main class="container">
@@ -1091,13 +1370,14 @@
               d="M8.25 9.75h7.5m-7.5 3.75h7.5m-7.5 3.75h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
-        <div class="status-title">Not in system yet 🤔</div>
-        <div class="status-message">
-          Maybe it's still on its way
+        <div class="status-title">Not received yet 🤔</div>
+        <div class="status-message" id="notFoundMessage">
+          Maybe still on its way
         </div>
-        <div class="status-detail">
+        <div class="status-detail" id="notFoundDetail">
           Scan the barcode to add it
         </div>
+        <button class="pin-btn" id="pinBtn">📌 Pin to Watch</button>
       </section>
 
       <!-- Labels List -->
@@ -1193,6 +1473,22 @@
             </svg>
           </div>
           <span>Double-tap any tracking number to copy it instantly</span>
+        </div>
+        <div class="instruction-item">
+          <div class="instruction-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </div>
+          <span>Pin a tracking number to watch it — auto-removed once received</span>
+        </div>
+        <div class="instruction-item">
+          <div class="instruction-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+          </div>
+          <span>Recent Entries refresh automatically every 30 seconds</span>
         </div>
       </section>
     </main>
@@ -1294,6 +1590,98 @@
       const newDetail = document.getElementById("newDetail");
       const statusError = document.getElementById("statusError");
       
+      // ── Auth ─────────────────────────────────────────────────────
+      const authOverlay   = document.getElementById("authOverlay");
+      const authStep1     = document.getElementById("authStep1");
+      const authStep2     = document.getElementById("authStep2");
+      const authRoleSD    = document.getElementById("authRoleSD");
+      const authRoleWH    = document.getElementById("authRoleWH");
+      const authRoleLabel = document.getElementById("authRoleLabel");
+      const authPwInput   = document.getElementById("authPwInput");
+      const authError     = document.getElementById("authError");
+      const authSubmitBtn = document.getElementById("authSubmitBtn");
+      const authBackBtn   = document.getElementById("authBackBtn");
+      const roleChip      = document.getElementById("roleChip");
+      const logoutBtn     = document.getElementById("logoutBtn");
+
+      const PASSWORDS = { warehouser: "1241101", service_desk: "winsome" };
+      const ROLE_LABELS = { warehouser: "Warehouser", service_desk: "Service Desk" };
+      let authRole = null;
+
+      function showAuthOverlay() {
+        authOverlay.classList.remove("hidden");
+        authStep2.classList.remove("visible");
+        authStep1.style.display = "";
+        authRoleSD.classList.remove("selected");
+        authRoleWH.classList.remove("selected");
+        authError.textContent = "";
+        authRole = null;
+      }
+
+      function hideAuthOverlay() { authOverlay.classList.add("hidden"); }
+
+      function goToPassword(role) {
+        authRole = role;
+        authRoleSD.classList.toggle("selected", role === "service_desk");
+        authRoleWH.classList.toggle("selected", role === "warehouser");
+        authStep1.style.display = "none";
+        authRoleLabel.innerHTML = `Signing in as <strong>${ROLE_LABELS[role]}</strong>`;
+        authStep2.classList.add("visible");
+        authPwInput.value = "";
+        authError.textContent = "";
+        setTimeout(() => authPwInput.focus(), 50);
+      }
+
+      function doVerify() {
+        const pw = authPwInput.value;
+        if (!pw) { authError.textContent = "Please enter a password."; return; }
+        if (pw === PASSWORDS[authRole]) {
+          sessionStorage.setItem("snaptrack_auth", "true");
+          sessionStorage.setItem("snaptrack_role", authRole);
+          hideAuthOverlay();
+          applyRole(authRole);
+          loadLabels();
+        } else {
+          authError.textContent = "Incorrect password. Please try again.";
+          authPwInput.value = "";
+          authPwInput.focus();
+        }
+      }
+
+      function applyRole(role) {
+        roleChip.textContent = ROLE_LABELS[role] ?? role;
+        roleChip.style.display = "";
+        logoutBtn.style.display = "";
+        const camBtn = document.getElementById("cameraBtn");
+        if (camBtn) camBtn.style.display = role === "warehouser" ? "" : "none";
+      }
+
+      authRoleSD.addEventListener("click", () => goToPassword("service_desk"));
+      authRoleWH.addEventListener("click", () => goToPassword("warehouser"));
+      authBackBtn.addEventListener("click", showAuthOverlay);
+      authSubmitBtn.addEventListener("click", doVerify);
+      authPwInput.addEventListener("keydown", (e) => { if (e.key === "Enter") doVerify(); });
+
+      logoutBtn.addEventListener("click", () => {
+        sessionStorage.removeItem("snaptrack_auth");
+        sessionStorage.removeItem("snaptrack_role");
+        applyRole.__applied = false;
+        roleChip.style.display = "none";
+        logoutBtn.style.display = "none";
+        const camBtn = document.getElementById("cameraBtn");
+        if (camBtn) camBtn.style.display = "none";
+        showAuthOverlay();
+      });
+
+      // Init: restore session or show modal
+      const savedRole = sessionStorage.getItem("snaptrack_role");
+      if (sessionStorage.getItem("snaptrack_auth") && savedRole) {
+        hideAuthOverlay();
+        applyRole(savedRole);
+      } else {
+        showAuthOverlay();
+      }
+      
       // Scanner Elements
       const scannerOverlay = document.getElementById("scannerOverlay");
       const scannerClose = document.getElementById("scannerClose");
@@ -1315,11 +1703,13 @@
       // Labels List Elements
       const labelsList = document.getElementById("labelsList");
       const labelsCount = document.getElementById("labelsCount");
+      const pinBtn = document.getElementById("pinBtn");
 
       let codeReader = null;
       let scannerControls = null;
       let isScanning = false;
       let pendingScanData = null;
+      let lastQueriedTracking = null; // { trackingNumber, carrier } for pin button
 
       // Format timestamp to Los Angeles time
       function formatLATime(timestamp) {
@@ -1346,6 +1736,7 @@
         statusExists.classList.remove("show");
         statusNew.classList.remove("show");
         statusError.classList.remove("show");
+        pinBtn.style.display = 'none';
       }
 
       // Show loading status
@@ -1374,6 +1765,26 @@
       function showError() {
         hideAllStatus();
         statusError.classList.add("show");
+
+        const role = sessionStorage.getItem('snaptrack_role');
+        const notFoundMessage = document.getElementById('notFoundMessage');
+        const notFoundDetail = document.getElementById('notFoundDetail');
+
+        if (role === 'service_desk') {
+          notFoundMessage.textContent = 'Maybe still on its way';
+          notFoundDetail.textContent = 'Pin it to get notified when it arrives.';
+          pinBtn.textContent = '🔒 Pin & Watch';
+          pinBtn.style.display = 'block';
+        } else if (role === 'warehouser') {
+          notFoundMessage.textContent = 'Maybe still on its way';
+          notFoundDetail.textContent = 'Scan the barcode to add it';
+          pinBtn.textContent = '📌 Pin to Watch';
+          pinBtn.style.display = 'block';
+        } else {
+          notFoundMessage.textContent = 'Maybe still on its way';
+          notFoundDetail.textContent = '';
+          pinBtn.style.display = 'none';
+        }
       }
 
       // Sanitize tracking number input
@@ -1419,10 +1830,13 @@
           const data = await response.json();
 
           if (data.exists) {
+            lastQueriedTracking = null;
             showExists(data.createdAt);
           } else {
+            lastQueriedTracking = { trackingNumber, carrier: detectCarrier(trackingNumber) };
             showError();
           }
+          loadLabels();
         } catch (error) {
           console.error("Search failed:", error);
           alert("Search failed. Please check your connection and try again.");
@@ -1701,18 +2115,76 @@
         e.target.value = e.target.value.toUpperCase();
       });
 
+      // ── Pin helpers ───────────────────────────────────────────────
+      async function pinTracking(trackingNumber, carrier) {
+        const role = sessionStorage.getItem('snaptrack_role');
+        const res = await fetch('/api/pins', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role, trackingNumber, carrier }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          pinBtn.style.display = 'none';
+          showToast('📌 Pinned to watch list');
+          loadLabels();
+        } else {
+          showToast(data.error || 'Pin failed');
+        }
+      }
+
+      async function unpinTracking(trackingNumber) {
+        const role = sessionStorage.getItem('snaptrack_role');
+        await fetch('/api/pins', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role, trackingNumber }),
+        });
+        loadLabels();
+      }
+
+      function showToast(msg) {
+        copyToast.textContent = msg;
+        clearTimeout(toastTimer);
+        copyToast.classList.add('show');
+        toastTimer = setTimeout(() => copyToast.classList.remove('show'), 2000);
+      }
+
+      // Pin button click
+      pinBtn.addEventListener('click', () => {
+        if (lastQueriedTracking) {
+          pinTracking(lastQueriedTracking.trackingNumber, lastQueriedTracking.carrier);
+        }
+      });
+
+      // ── loadLabels ────────────────────────────────────────────────
       async function loadLabels() {
         try {
-          const response = await fetch("/api/labels?limit=5");
-          const data = await response.json();
+          const role = sessionStorage.getItem('snaptrack_role');
 
-          if (!data.success) {
-            throw new Error(data.error);
-          }
+          // Fetch labels and pins in parallel
+          const [labelsRes, pinsRes] = await Promise.all([
+            fetch("/api/labels?limit=10"),
+            role ? fetch(`/api/pins?role=${encodeURIComponent(role)}`) : Promise.resolve(null),
+          ]);
 
-          labelsCount.textContent = `${data.count} entries`;
+          const data = await labelsRes.json();
+          if (!data.success) throw new Error(data.error);
 
-          if (data.labels.length === 0) {
+          const pinsData = pinsRes ? await pinsRes.json() : { pins: [] };
+          const pins = pinsData.pins ?? [];
+
+          // Build set of pinned tracking numbers for dedup
+          const pinnedSet = new Set(pins.map(p => p.trackingNumber));
+
+          // Filter out labels already shown as pinned
+          const regularLabels = data.labels.filter(l => !pinnedSet.has(l.trackingNumber));
+
+          labelsCount.textContent = `${data.count} entries${pins.length ? ` · ${pins.length} watching` : ''}`;
+
+          const hasContent = pins.length > 0 || regularLabels.length > 0;
+
+          if (!hasContent) {
             labelsList.innerHTML = `
               <div class="labels-empty">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -1725,46 +2197,84 @@
             return;
           }
 
+          function formatDate(str) {
+            try {
+              return new Date(str).toLocaleDateString('en-US', {
+                timeZone: 'America/Los_Angeles', month: 'short', day: 'numeric'
+              });
+            } catch { return str?.substring(0, 10) || ''; }
+          }
+
+          const pinnedRows = pins.map(p => `
+            <div class="label-item pinned" data-tracking="${p.trackingNumber}">
+              <div class="col-carrier"><span class="label-badge ${p.carrier.toLowerCase()}">${p.carrier}</span></div>
+              <div class="col-tracking">
+                <span class="pin-icon">📌</span>
+                <span class="label-tracking">${p.trackingNumber}</span>
+              </div>
+              <div class="col-date">
+                <button class="unpin-btn" data-tn="${p.trackingNumber}">Unpin</button>
+              </div>
+            </div>
+          `).join('');
+
+          const isWarehouser = role === 'warehouser';
+          const regularRows = regularLabels.map(label => `
+            <div class="label-item">
+              <div class="col-carrier"><span class="label-badge ${label.carrier.toLowerCase()}">${label.carrier}</span></div>
+              <div class="col-tracking"><span class="label-tracking">${label.trackingNumber}</span></div>
+              <div class="col-date label-meta">
+                ${isWarehouser ? `<button class="delete-entry-btn" data-id="${label.id}" title="Delete">🗑️</button>` : ''}
+                ${formatDate(label.createdAt)}
+              </div>
+            </div>
+          `).join('');
+
           labelsList.innerHTML =
             `<div class="labels-list-header">
                <span class="col-carrier">Carrier</span>
                <span class="col-tracking">Tracking #</span>
                <span class="col-date">Date</span>
              </div>` +
-            data.labels
-              .map((label) => {
-                let dateStr = '';
-                try {
-                  const date = new Date(label.createdAt);
-                  dateStr = date.toLocaleDateString('en-US', {
-                    timeZone: 'America/Los_Angeles',
-                    month: 'short',
-                    day: 'numeric'
-                  });
-                } catch (e) {
-                  dateStr = label.createdAt?.substring(0, 10) || '';
-                }
+            pinnedRows + regularRows;
 
-                return `
-                  <div class="label-item">
-                    <div class="col-carrier"><span class="label-badge ${label.carrier.toLowerCase()}">${label.carrier}</span></div>
-                    <div class="col-tracking"><span class="label-tracking">${label.trackingNumber}</span></div>
-                    <div class="col-date label-meta">${dateStr}</div>
-                  </div>
-                `;
-              })
-              .join("");
-
+          // Double-click to copy
           labelsList.querySelectorAll('.label-tracking').forEach((el) => {
             el.addEventListener('dblclick', () => {
-              const trackingNumber = el.textContent.trim();
-              // 复制到剪贴板
-              navigator.clipboard.writeText(trackingNumber).then(showCopyToast);
-              // 同步到搜索框
-              trackingInput.value = trackingNumber;
+              navigator.clipboard.writeText(el.textContent.trim()).then(showCopyToast);
+              trackingInput.value = el.textContent.trim();
               trackingInput.focus();
             });
           });
+
+          // Unpin buttons
+          labelsList.querySelectorAll('.unpin-btn').forEach((btn) => {
+            btn.addEventListener('click', () => unpinTracking(btn.dataset.tn));
+          });
+
+          // Delete entry buttons (warehouser only)
+          labelsList.querySelectorAll('.delete-entry-btn').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              const id = parseInt(btn.dataset.id, 10);
+              try {
+                const res = await fetch('/api/delete', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ id }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                  showToast('Deleted ✓');
+                  loadLabels();
+                } else {
+                  showToast(data.error || 'Delete failed');
+                }
+              } catch {
+                showToast('Delete failed');
+              }
+            });
+          });
+
         } catch (error) {
           console.error("Failed to load labels:", error);
           labelsList.innerHTML = `
@@ -1785,13 +2295,13 @@
       document.body.appendChild(copyToast);
 
       let toastTimer = null;
-      function showCopyToast() {
-        clearTimeout(toastTimer);
-        copyToast.classList.add('show');
-        toastTimer = setTimeout(() => copyToast.classList.remove('show'), 1500);
-      }
+      function showCopyToast() { showToast('Copied ✓'); }
 
       loadLabels();
+
+      // Auto-refresh every 30 seconds
+      setInterval(loadLabels, 30_000);
     </script>
+
   </body>
 </html>
