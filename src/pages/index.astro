@@ -169,6 +169,149 @@
         cursor: not-allowed;
       }
 
+      .manual-add-btn {
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.75rem;
+        background: transparent;
+        color: var(--primary);
+        border: 1.5px solid var(--primary);
+        border-radius: 0.75rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .manual-add-btn:active {
+        background: rgba(79, 70, 229, 0.08);
+      }
+
+      /* Manual Add Modal */
+      .manual-add-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+
+      .manual-add-modal.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .manual-add-card {
+        background: var(--card);
+        border-radius: 1.25rem 1.25rem 0 0;
+        padding: 1.5rem;
+        width: 100%;
+        max-width: 480px;
+        transform: translateY(20px);
+        transition: transform 0.25s ease;
+      }
+
+      .manual-add-modal.active .manual-add-card {
+        transform: translateY(0);
+      }
+
+      .manual-add-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.25rem;
+      }
+
+      .manual-add-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        margin-bottom: 1.25rem;
+      }
+
+      .manual-add-input {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1.5px solid var(--border);
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        font-family: monospace;
+        outline: none;
+        transition: border-color 0.2s;
+        background: var(--bg);
+        color: var(--text);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .manual-add-input:focus {
+        border-color: var(--primary);
+      }
+
+      .manual-add-carrier-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 0.75rem;
+        padding: 0.6rem 0.85rem;
+        background: var(--bg);
+        border-radius: 0.6rem;
+        font-size: 0.875rem;
+      }
+
+      .manual-add-carrier-label {
+        color: var(--text-light);
+      }
+
+      .manual-add-carrier-value {
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .manual-add-carrier-value.ups { color: #7c3aed; }
+      .manual-add-carrier-value.fedex { color: #9c26a8; }
+      .manual-add-carrier-value.unknown { color: var(--text-light); }
+
+      .manual-add-buttons {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.25rem;
+      }
+
+      .manual-add-btn-cancel {
+        flex: 1;
+        padding: 0.85rem;
+        border: 1.5px solid var(--border);
+        border-radius: 0.75rem;
+        background: transparent;
+        color: var(--text-light);
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .manual-add-btn-save {
+        flex: 2;
+        padding: 0.85rem;
+        border: none;
+        border-radius: 0.75rem;
+        background: var(--primary);
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .manual-add-btn-save:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
       /* Status Card */
       .status-card {
         border-radius: 1rem;
@@ -1300,6 +1443,7 @@
           </button>
         </div>
         <button class="search-btn" id="searchBtn">Search</button>
+        <button class="manual-add-btn" id="manualAddBtn" style="display:none">+ Manual Add</button>
       </section>
 
       <!-- Status Cards -->
@@ -1496,6 +1640,32 @@
     <footer class="footer">SnapTrack MVP v1.0 · Cloudflare Edge</footer>
 
     <!-- Scan Result Modal -->
+    <!-- Manual Add Modal (Warehouser only) -->
+    <div class="manual-add-modal" id="manualAddModal">
+      <div class="manual-add-card">
+        <div class="manual-add-title">Manual Entry</div>
+        <div class="manual-add-subtitle">Type the tracking number to add it directly</div>
+        <input
+          type="text"
+          class="manual-add-input"
+          id="manualAddInput"
+          placeholder="e.g. 1Z1234567890123456"
+          inputmode="text"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+        <div class="manual-add-carrier-row">
+          <span class="manual-add-carrier-label">Detected Carrier</span>
+          <span class="manual-add-carrier-value unknown" id="manualAddCarrier">—</span>
+        </div>
+        <div class="manual-add-buttons">
+          <button class="manual-add-btn-cancel" id="manualAddCancel">Cancel</button>
+          <button class="manual-add-btn-save" id="manualAddSave" disabled>Save</button>
+        </div>
+      </div>
+    </div>
+
     <div class="scan-result-modal" id="scanResultModal">
       <div class="scan-result-card">
         <div class="scan-result-header">
@@ -1654,6 +1824,8 @@
         logoutBtn.style.display = "";
         const camBtn = document.getElementById("cameraBtn");
         if (camBtn) camBtn.style.display = role === "warehouser" ? "" : "none";
+        const manualAddBtn = document.getElementById("manualAddBtn");
+        if (manualAddBtn) manualAddBtn.style.display = role === "warehouser" ? "" : "none";
       }
 
       authRoleSD.addEventListener("click", () => goToPassword("service_desk"));
@@ -1670,6 +1842,8 @@
         logoutBtn.style.display = "none";
         const camBtn = document.getElementById("cameraBtn");
         if (camBtn) camBtn.style.display = "none";
+        const manualAddBtn = document.getElementById("manualAddBtn");
+        if (manualAddBtn) manualAddBtn.style.display = "none";
         showAuthOverlay();
       });
 
@@ -2109,6 +2283,95 @@
       // Scan result modal event listeners
       scanResultCancel.addEventListener("click", hideScanResultModal);
       scanResultSave.addEventListener("click", handleScanSave);
+
+      // ── Manual Add Modal (Warehouser) ─────────────────────────────
+      const manualAddModal  = document.getElementById("manualAddModal");
+      const manualAddInput  = document.getElementById("manualAddInput");
+      const manualAddCarrier = document.getElementById("manualAddCarrier");
+      const manualAddCancel = document.getElementById("manualAddCancel");
+      const manualAddSave   = document.getElementById("manualAddSave");
+      const manualAddBtnEl  = document.getElementById("manualAddBtn");
+
+      function openManualAddModal() {
+        manualAddInput.value = "";
+        manualAddCarrier.textContent = "—";
+        manualAddCarrier.className = "manual-add-carrier-value unknown";
+        manualAddSave.disabled = true;
+        manualAddModal.classList.add("active");
+        setTimeout(() => manualAddInput.focus(), 150);
+      }
+
+      function closeManualAddModal() {
+        manualAddModal.classList.remove("active");
+      }
+
+      function updateManualAddCarrier() {
+        const raw = manualAddInput.value.replace(/[\s\-]/g, "").toUpperCase();
+        const carrier = detectCarrier(raw);
+        const UPS_RE   = /^1Z[0-9A-Z]{16}$/i;
+        const FEDEX_RE = /^\d{12}$|^\d{15}$|^\d{22}$/;
+        const valid = UPS_RE.test(raw) || FEDEX_RE.test(raw);
+        if (raw.length === 0) {
+          manualAddCarrier.textContent = "—";
+          manualAddCarrier.className = "manual-add-carrier-value unknown";
+          manualAddSave.disabled = true;
+        } else if (valid) {
+          manualAddCarrier.textContent = carrier;
+          manualAddCarrier.className = `manual-add-carrier-value ${carrier.toLowerCase()}`;
+          manualAddSave.disabled = false;
+        } else {
+          manualAddCarrier.textContent = "Invalid format";
+          manualAddCarrier.className = "manual-add-carrier-value unknown";
+          manualAddSave.disabled = true;
+        }
+      }
+
+      async function saveManualAdd() {
+        const raw = manualAddInput.value.replace(/[\s\-]/g, "").toUpperCase();
+        if (!raw) return;
+
+        manualAddSave.disabled = true;
+        manualAddSave.textContent = "Saving...";
+
+        try {
+          const response = await fetch("/api/save-label", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ trackingNumber: raw }),
+          });
+          const data = await response.json();
+          closeManualAddModal();
+          manualAddSave.textContent = "Save";
+
+          if (data.success) {
+            trackingInput.value = raw;
+            if (data.exists) {
+              showExists(data.createdAt);
+            } else {
+              showNewEntry(data.createdAt);
+              loadLabels();
+            }
+          } else {
+            alert(data.error || "Save failed. Please try again.");
+          }
+        } catch (err) {
+          console.error("Manual add failed:", err);
+          manualAddSave.disabled = false;
+          manualAddSave.textContent = "Save";
+          alert("Save failed. Please try again.");
+        }
+      }
+
+      manualAddBtnEl.addEventListener("click", openManualAddModal);
+      manualAddCancel.addEventListener("click", closeManualAddModal);
+      manualAddSave.addEventListener("click", saveManualAdd);
+      manualAddInput.addEventListener("input", updateManualAddCarrier);
+      manualAddInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter" && !manualAddSave.disabled) saveManualAdd();
+      });
+      manualAddModal.addEventListener("click", (e) => {
+        if (e.target === manualAddModal) closeManualAddModal();
+      });
 
       // Auto uppercase on input
       trackingInput.addEventListener("input", (e) => {
