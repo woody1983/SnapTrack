@@ -2249,13 +2249,12 @@
         manualInputPanel.classList.remove("active");
       }
 
-      // Handle manual input confirm
+      // Handle manual input confirm — treat same as camera scan (save, not search)
       function confirmManualInput() {
         const value = manualInputField.value.trim();
         if (value) {
-          stopScanner();
-          trackingInput.value = value.toUpperCase();
-          checkTracking();
+          hideManualInput();
+          handleBarcodeResult(value);
         }
       }
 
